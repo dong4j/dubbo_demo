@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.1.xsd
+       http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    <!-- 自动扫描 -->
+    <context:component-scan base-package="com.dong4j.provider"/>
+    <!--<context:annotation-config/>-->
+    <!-- 引入配置文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:jdbc.properties"/>
+    </bean>
+
+    <bean id="keyRecycleLink" class="com.dong4j.provider.common.KeyRecycleLink"/>
+    <bean id="dataSourceKey" class="com.dong4j.provider.util.DataSourceKey">
+        <property name="keyRecycleLink" ref="keyRecycleLink"/>
+    </bean>
+    <bean id="zookeeperclient" class="com.dong4j.provider.common.ZookeeperClient">
+        <property name="dataSourceKey" ref="dataSourceKey"/>
+    </bean>
+
+    <!--<bean id = "dataSource1" class = "com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">-->
+        <!--<property name="url" value="${url1}"/>-->
+        <!--<property name = "username" value = "${username1}"/>-->
+        <!--<property name = "password" value = "${password1}"/>-->
+        <!--&lt;!&ndash;<property name="driverClassName" value="${driver3}"/>&ndash;&gt;-->
+        <!--&lt;!&ndash; 初始化连接大小 &ndash;&gt;-->
+        <!--<property name="initialSize" value="0" />-->
+        <!--&lt;!&ndash; 连接池最大使用连接数量 &ndash;&gt;-->
+        <!--<property name="maxActive" value="20" />-->
+        <!--&lt;!&ndash; 连接池最大空闲 &ndash;&gt;-->
+        <!--<property name="maxIdle" value="20" />-->
+        <!--&lt;!&ndash; 连接池最小空闲 &ndash;&gt;-->
+        <!--<property name="minIdle" value="0" />-->
+        <!--&lt;!&ndash; 获取连接最大等待时间 &ndash;&gt;-->
+        <!--<property name="maxWait" value="60000" />-->
+    <!--</bean>-->
+
+    <!--<bean id = "dataSource2" class = "com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">-->
+        <!--<property name="url" value="${url2}"/>-->
+        <!--<property name = "username" value = "${username2}"/>-->
+        <!--<property name = "password" value = "${password2}"/>-->
+        <!--&lt;!&ndash;<property name="driverClassName" value="${driver3}"/>&ndash;&gt;-->
+        <!--&lt;!&ndash; 初始化连接大小 &ndash;&gt;-->
+        <!--<property name="initialSize" value="0" />-->
+        <!--&lt;!&ndash; 连接池最大使用连接数量 &ndash;&gt;-->
+        <!--<property name="maxActive" value="20" />-->
+        <!--&lt;!&ndash; 连接池最大空闲 &ndash;&gt;-->
+        <!--<property name="maxIdle" value="20" />-->
+        <!--&lt;!&ndash; 连接池最小空闲 &ndash;&gt;-->
+        <!--<property name="minIdle" value="0" />-->
+        <!--&lt;!&ndash; 获取连接最大等待时间 &ndash;&gt;-->
+        <!--<property name="maxWait" value="60000" />-->
+    <!--</bean>-->
+
+    <bean id = "dataSource3" class = "com.alibaba.druid.pool.DruidDataSource" init-method="init">
+        <property name="url" value="${url3}"/>
+        <property name = "username" value = "${username3}"/>
+        <property name = "password" value = "${password3}"/>
+        <!--<property name="driverClassName" value="${driver3}"/>-->
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="0" />
+        <!-- 连接池最大使用连接数量 -->
+        <property name="maxActive" value="20" />
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="20" />
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="0" />
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="60000" />
+    </bean>
+    <!-- 配置多数据源映射关系 -->
+    <util:map id="dataSources">
+        <!--<entry key="DATASOURCE1" value-ref="dataSource1"/>-->
+        <!--<entry key="DATASOURCE2" value-ref="dataSource2"/>-->
+        <entry key="DATASOURCE3" value-ref="dataSource3"/>
+    </util:map>
+    <bean id="dataSourceLookup" class="org.springframework.jdbc.datasource.lookup.MapDataSourceLookup">
+        <constructor-arg ref="dataSources"/>
+    </bean>
+    <bean id="dataSource" class="com.dong4j.provider.util.ThreadLocalRountingDataSource">
+        <property name="defaultTargetDataSource" ref="dataSource3"/>
+        <property name="targetDataSources" ref="dataSources"/>
+        <property name="dataSourceLookup" ref="dataSourceLookup"/>
+    </bean>
+
+
+    <!--<bean id="routing4DBDataSource" class="com.google.code.routing4db.datasource.Routing4DBDataSource">-->
+        <!--<property name="targetDataSources">-->
+            <!--<map>-->
+                <!--<entry key="dataSourceOne" value-ref="dataSource1"/>-->
+                <!--<entry key="dataSourceTwo" value-ref="dataSource2"/>-->
+                <!--<entry key="dataSourceThree" value-ref="dataSource3"/>-->
+            <!--</map>-->
+        <!--</property>-->
+        <!--&lt;!&ndash; 无路由配置时默认的datasource &ndash;&gt;-->
+        <!--<property name="defaultTargetDataSource" ref="dataSource1"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; spring和MyBatis完美整合，不需要mybatis的配置映射文件 &ndash;&gt;-->
+    <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+        <!--<property name="dataSource" ref="routing4DBDataSource"/>-->
+        <!--&lt;!&ndash; 自动扫描mapping.xml文件 &ndash;&gt;-->
+        <!--<property name="mapperLocations" value="classpath:mapping/*.xml"/>-->
+    <!--</bean>-->
+    <!--&lt;!&ndash; DAO接口所在包名，Spring会自动查找其下的类 &ndash;&gt;-->
+    <!--<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">-->
+        <!--<property name="basePackage" value="com.dong4j.provider.dao"/>-->
+        <!--<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; (事务管理)transaction manager, use JtaTransactionManager for global tx &ndash;&gt;-->
+    <!--<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+        <!--<property name="dataSource" ref="routing4DBDataSource"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; 配置路由策略 &ndash;&gt;-->
+    <!--<bean id="modRoutingStrategy" class="com.google.code.routing4db.strategy.impl.ModRoutingStrategy">-->
+        <!--&lt;!&ndash; 分4个数据库, 采用Id属性进行分库路由 &ndash;&gt;-->
+        <!--<property name="dataSourceNum" value="4"/>-->
+        <!--<property name="propertyName" value="id"/>-->
+        <!--&lt;!&ndash;取模的数据源 从0开始,以此编号 &ndash;&gt;-->
+        <!--<property name="dataSourceKeyMap">-->
+            <!--<map>-->
+                <!--<entry key="0" value="dataSource1"/>-->
+                <!--<entry key="1" value="dataSource2"/>-->
+                <!--<entry key="2" value="dataSource3"/>-->
+            <!--</map>-->
+        <!--</property>-->
+    <!--</bean>-->
+    <!--&lt;!&ndash; JdbcTemplate &ndash;&gt;-->
+    <!--<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">-->
+        <!--<property name="dataSource" ref="routing4DBDataSource"/>-->
+    <!--</bean>-->
+
+    <!---->
+    <!--&lt;!&ndash; Dao实现 &ndash;&gt;-->
+    <!--<bean id="userDaoTarget" class="com.google.code.routing4db.dao.UserDao.JdbcTemplateImpl"/>-->
+    <!--&lt;!&ndash; 配置DAO接口代理 )&ndash;&gt;-->
+    <!--<bean id="userDao" class="com.google.code.routing4db.spring.RoutingSpringFactoryBean">-->
+        <!--&lt;!&ndash; 代理接口 &ndash;&gt;-->
+        <!--<property name="targetInterface" value="com.google.code.routing4db.dao.UserDao"/>-->
+        <!--&lt;!&ndash; 代理的DAO实际对象 &ndash;&gt;-->
+        <!--<property name="targetObject" ref="userDaoTarget"/>-->
+        <!--&lt;!&ndash; 路由策略 &ndash;&gt;-->
+        <!--<property name="routingStrategy" ref="modRoutingStrategy"/>-->
+    <!--</bean>-->
+
+
+     <!--消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样-->
+    <dubbo:application name="provider" />
+
+    <!-- 使用广播注册中心暴露服务地址 -->
+    <!--<dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" file="e:/test_1.text"/>-->
+    <!-- <dubbo:registry address="192.168.168.101:9090" file="${user.home}/registryCache/consumer_1.txt"/> -->
+
+    <dubbo:monitor protocol="registry"/>
+
+    <!-- 使用zookeeper注册中心暴露服务地址 -->
+    <dubbo:registry address="zookeeper://127.0.0.1:2181" />
+
+    <!-- 声明需要暴露的服务接口 -->
+    <dubbo:service interface="com.dong4j.provider.providerservice.ProviderUserService" ref="providerUserService" />
+    <bean id = "providerUserService" class="com.dong4j.provider.providerservice.imp.ProviderUserServiceImp"/>
+</beans>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间,作用就是对sql进行分类化管理,理解sql隔离
+注意:使用mapper代理方法开发,namespace有特殊重要的作用,namespace等于mapper接口地址-->
+<mapper namespace="com.dong4j.provider.dao.UserDao">
+    <resultMap type="com.dong4j.provider.entity.User" id="BaseResultMap">
+        <result property="id" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="passWord" column="user_password" />
+    </resultMap>
+    <select id="login" resultMap="BaseResultMap" parameterType="com.dong4j.provider.entity.User">
+        select
+        user_id  ,
+        user_name ,
+        user_password
+        from t_user
+        where user_name = #{userName}
+        and user_password = #{passWord}
+    </select>
+    <select id="getAllUsers" resultMap="BaseResultMap">
+        select
+        user_id as id,
+        user_name as userName,
+        user_password as passWord
+        from t_user
+    </select>
+</mapper>
